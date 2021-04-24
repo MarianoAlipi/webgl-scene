@@ -5,8 +5,10 @@ let leftPillar, rightPillar,
     shimaki, kasagi,
     bar1, bar2, column1, column2,
     colTop1, colTop2, colTopCone1, colTopCone2,
-    leftSideGroup, rightSideGroup;
+    leftSideGroup, rightSideGroup,
+    sun;
 
+// Properties for the torii
 const TORII = {
     x: -8,
     y: 4.8,
@@ -155,6 +157,16 @@ function init() {
     rightSideGroup.position.x = TORII.x + TORII.radius;
     scene.add(rightSideGroup);
 
+    // == SUN ==
+    // radius, widthSegments, heightSegments
+    geometry = new THREE.SphereGeometry(2.5, 32, 32);
+    material = new THREE.MeshBasicMaterial( {color: 0xfff9d4} );
+    sun = new THREE.Mesh(geometry, material);
+    sun.position.x = 16;
+    sun.position.y = 16;
+    sun.position.z = -40;
+    scene.add(sun);
+
     // == CAMERA ==
     // Place the camera a bit higher.
     camera.position.y = 4;
@@ -165,16 +177,16 @@ function init() {
     //  |\_/‾\_/‾‾|_    //
     //  |         | |   //
     //  |_________|‾    //
-    camera.position.x = -2;
-    camera.position.y = 7;
-    camera.position.z = -8;-12;
+    camera.position.x = 0;
+    camera.position.y = 6;
+    camera.position.z = 10;
     
-    camera.rotation.y = 0.7;1.5;
-    camera.rotation.z = 0.1;
+    camera.rotation.y = 0;
+    camera.rotation.z = 0;
     ///////////////////////
     
     // Tilt the camera slightly down.
-    camera.rotation.x = -0.2;
+    camera.rotation.x = -0.1;
     
     controls = new THREE.OrbitControls(camera, renderer.domElement);
 }
