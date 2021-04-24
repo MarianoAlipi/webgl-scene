@@ -178,7 +178,7 @@ function init() {
     //  |         | |   //
     //  |_________|‾    //
     camera.position.x = 0;
-    camera.position.y = 6;
+    camera.position.y = 3;
     camera.position.z = 10;
     
     camera.rotation.y = 0;
