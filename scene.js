@@ -1,6 +1,11 @@
 let scene, camera, renderer, controls;
 let cube, ground;
-let leftPillar, rightPillar, nuki, gakuzuka, shimaki, kasagi;
+let leftPillar, rightPillar,
+    nuki, gakuzuka,
+    shimaki, kasagi,
+    bar1, bar2, column1, column2,
+    colTop1, colTop2, colTopCone1, colTopCone2,
+    leftSideGroup, rightSideGroup;
 
 const TORII = {
     x: -8,
@@ -30,7 +35,7 @@ function init() {
 
     // CUBE
     // width, height, depth, widthSegments, heightSegments, depthSegments
-    let geometry = new THREE.BoxGeometry(2, 2, 2); // depth, width, height
+    let geometry = new THREE.BoxGeometry(2, 2, 2);
     let texture = new THREE.TextureLoader().load('textures/hello.png');
     let material = new THREE.MeshBasicMaterial( {map: texture} );
     cube = new THREE.Mesh(geometry, material);
@@ -64,10 +69,10 @@ function init() {
 
     // -- NUKI --
     // Middle horizontal bar
-    geometry = new THREE.BoxGeometry(9, 0.9, 0.5);
+    geometry = new THREE.BoxGeometry(11, 0.9, 0.5);
     nuki = new THREE.Mesh(geometry, TORII.redMaterial);
     nuki.position.x = TORII.x;
-    nuki.position.y = TORII.y + TORII.pillarHeight / 4;
+    nuki.position.y = TORII.y + TORII.pillarHeight / 4 + 0.5;
     nuki.position.z = TORII.z;
     scene.add(nuki);
 
@@ -82,21 +87,73 @@ function init() {
     
     // -- SHIMAKI --
     // Top red bar
-    geometry = new THREE.BoxGeometry(10, 0.9, 0.7);
+    geometry = new THREE.BoxGeometry(12, 0.9, 0.7);
     shimaki = new THREE.Mesh(geometry, TORII.redMaterial);
     shimaki.position.x = TORII.x;
-    shimaki.position.y = TORII.y + TORII.pillarHeight / 2 + 0.4;
+    shimaki.position.y = TORII.y + TORII.pillarHeight / 2;
     shimaki.position.z = TORII.z;
     scene.add(shimaki);
 
     // -- KASAGI --
     // Top black bar
-    geometry = new THREE.BoxGeometry(12, 0.9, 0.8);
+    geometry = new THREE.BoxGeometry(14.5, 0.9, 0.8);
     kasagi = new THREE.Mesh(geometry, TORII.blackMaterial);
     kasagi.position.x = TORII.x;
-    kasagi.position.y = shimaki.position.y + 1;
+    kasagi.position.y = shimaki.position.y + 0.6;
     kasagi.position.z = TORII.z;
     scene.add(kasagi);
+
+    // -- SIDE STRUCTURES --
+    // Positions are relative to the group.
+    geometry = new THREE.BoxGeometry(0.4, 0.65, 7.25);
+    bar1 = new THREE.Mesh(geometry, TORII.redMaterial);
+    bar1.position.y = 2;
+    bar2 = bar1.clone();
+    bar2.position.y = -0.75;
+
+    // Columns
+    geometry = new THREE.CylinderGeometry(0.35, 0.4, 6, 24);
+    column1 = new THREE.Mesh(geometry, TORII.redMaterial);
+    column1.position.z = 3;
+    column2 = column1.clone();
+    column2.position.z = -3;
+
+    // Column top
+    geometry = new THREE.CylinderGeometry(0.75, 0.7, 0.25, 4);
+    colTop1 = new THREE.Mesh(geometry, TORII.redMaterial);
+    colTop1.position.y = 3;
+    colTop1.position.z = 3;
+    colTop1.rotation.y = 0.8;
+    colTop2 = colTop1.clone();
+    colTop2.position.z = -3;
+
+    // Cone on column top
+    geometry = new THREE.ConeGeometry(0.85, 0.3, 4);
+    colTopCone1 = new THREE.Mesh(geometry, TORII.blackMaterial);
+    colTopCone1.position.y = 3.25;
+    colTopCone1.position.z = 3;
+    colTopCone1.rotation.y = 0.8;
+    colTopCone2 = colTopCone1.clone();
+    colTopCone2.position.z = -3;
+
+    // Groups
+    leftSideGroup = new THREE.Group();
+    leftSideGroup.position.x = TORII.x - TORII.radius;
+    leftSideGroup.position.y = TORII.y / 2;
+    leftSideGroup.position.z = TORII.z;
+    leftSideGroup.add(bar1);
+    leftSideGroup.add(bar2);
+    leftSideGroup.add(column1);
+    leftSideGroup.add(column2);
+    leftSideGroup.add(colTop1);
+    leftSideGroup.add(colTop2);
+    leftSideGroup.add(colTopCone1);
+    leftSideGroup.add(colTopCone2);
+    scene.add(leftSideGroup);
+
+    rightSideGroup = leftSideGroup.clone();
+    rightSideGroup.position.x = TORII.x + TORII.radius;
+    scene.add(rightSideGroup);
 
     // == CAMERA ==
     // Place the camera a bit higher.
@@ -104,10 +161,10 @@ function init() {
     
     ///////////////////////
     //   DEBUG CAMERA   //
-    //  /‾\_/‾\         //
-    // |\_/‾\_/‾‾|_     //
-    // |         | |    //
-    // |_________|‾     //
+    //   /‾\_/‾\        //
+    //  |\_/‾\_/‾‾|_    //
+    //  |         | |   //
+    //  |_________|‾    //
     camera.position.x = -2;
     camera.position.y = 7;
     camera.position.z = -8;-12;
@@ -126,7 +183,7 @@ function init() {
 function animate() {
     requestAnimationFrame(animate);
 
-    controls.update();
+    //controls.update();
 
     cube.rotation.x += 0.01;
     cube.rotation.y += 0.01;
