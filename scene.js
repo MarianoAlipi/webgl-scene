@@ -10,7 +10,8 @@ let leftPillar, rightPillar,
     shipBody, shipTip, shipRoof1, shipRoof2,
     shipGroup;
 
-let shipTurning = false, shipDir = 'left';
+let shipTurning = false, shipDir = 'left',
+    shipBob = true, bobDuration = 30, bobFrames = bobDuration;
 
 // Properties for the torii
 const TORII = {
@@ -45,15 +46,15 @@ function init() {
     let texture = new THREE.TextureLoader().load('textures/hello.png');
     let material = new THREE.MeshBasicMaterial( {map: texture} );
     cube = new THREE.Mesh(geometry, material);
-    cube.position.x = 10;
+    cube.position.x = 20;
     cube.position.y = 2;
     cube.position.z = -10;
     scene.add(cube);
     
     // GROUND
     // width, height, widthSegments, heightSegments
-    geometry = new THREE.PlaneGeometry(50, 50);
-    material = new THREE.MeshBasicMaterial( {color: 0x555555, side: THREE.DoubleSide} );
+    geometry = new THREE.PlaneGeometry(200, 200);
+    material = new THREE.MeshBasicMaterial( {color: 0x3e67ad, side: THREE.DoubleSide} );
     ground = new THREE.Mesh(geometry, material);
     ground.rotation.x = Math.PI / 2;
     scene.add(ground);
@@ -84,6 +85,7 @@ function init() {
 
     // -- GAKUZUKA --
     // Bar from middle to top
+    // TODO: Add plaque.
     geometry = new THREE.BoxGeometry(0.8, 2, 0.3);
     gakuzuka = new THREE.Mesh(geometry, TORII.redMaterial);
     gakuzuka.position.x = TORII.x;
@@ -102,6 +104,7 @@ function init() {
 
     // -- KASAGI --
     // Top black bar
+    // TODO: Add sharp end. If possible, add curvature to the horizontal bars.
     geometry = new THREE.BoxGeometry(14.5, 0.9, 0.8);
     kasagi = new THREE.Mesh(geometry, TORII.blackMaterial);
     kasagi.position.x = TORII.x;
@@ -163,6 +166,7 @@ function init() {
 
     // == SUN ==
     // radius, widthSegments, heightSegments
+    // TODO: Add sun movement.
     geometry = new THREE.SphereGeometry(2.5, 32, 32);
     material = new THREE.MeshBasicMaterial( {color: 0xfff9d4} );
     sun = new THREE.Mesh(geometry, material);
@@ -173,6 +177,7 @@ function init() {
 
     // == SHIP ==
     // -- Body --
+    // TODO: Add cover (plane) to the ship.
     geometry = new THREE.CylinderGeometry(1, 0.8, 3, 5, 3, false, 0, Math.PI);
     material = new THREE.MeshBasicMaterial( {color: 0x777777, side: THREE.DoubleSide} );
     shipBody = new THREE.Mesh(geometry, material);
@@ -205,10 +210,12 @@ function init() {
     shipGroup.add(shipRoof1);
     shipGroup.add(shipRoof2);
 
-    shipGroup.position.x = 20;
-    shipGroup.position.y = 3;
-    shipGroup.position.z = -30;
+    shipGroup.position.x = 50;
+    shipGroup.position.y = 0.6;
+    shipGroup.position.z = -50;
     scene.add(shipGroup);
+
+    // TODO: Add sky box.
 
     // == CAMERA ==
     // Place the camera a bit higher.
@@ -243,10 +250,31 @@ function animate() {
     cube.rotation.x += 0.01;
     cube.rotation.y += 0.01;
 
+    shipGroup.position.y += (shipBob ? 1 : -1) * Math.random() * 0.01;
+    if (--bobFrames <= 0) {
+        shipBob = !shipBob;
+        bobFrames = bobDuration + (Math.random() < 0.5 ? 1 : -1) * 5;
+    }
+    
+    if (shipGroup.position.y < 0.6) {
+        shipGroup.position.y = 0.6;
+    } else if (shipGroup.position.y > 0.7) {
+        shipGroup.position.y = 0.7;
+    }
+
+    // TODO: Make the sea movement independent.
+    ground.position.y += (shipBob ? 1 : -1) * Math.random() * 0.015;
+
+    if (ground.position.y < -0.2) {
+        ground.position.y = 0.2;
+    } else if (ground.position.y > 0.2) {
+        ground.position.y = 0.2;
+    }
+
     if (shipTurning) {
         if (shipDir == 'left') {
             if (shipGroup.rotation.y < Math.PI) {
-                shipGroup.rotation.y += 0.02;
+                shipGroup.rotation.y += 0.035;
                 shipTurning = true;
             } else {
                 shipTurning = false;
@@ -254,7 +282,7 @@ function animate() {
             }
         } else {
             if (shipGroup.rotation.y > 0) {
-                shipGroup.rotation.y -= 0.02;
+                shipGroup.rotation.y -= 0.035;
                 shipTurning = true;
             } else {
                 shipTurning = false;
@@ -263,14 +291,14 @@ function animate() {
         }
     } else {
         if (shipDir == 'left') {
-            if (shipGroup.position.x > -20) {
+            if (shipGroup.position.x > -50) {
                 shipGroup.position.x -= 0.025;
                 shipTurning = false;
             } else {
                 shipTurning = true;
             }
         } else {
-            if (shipGroup.position.x < 20) {
+            if (shipGroup.position.x < 50) {
                 shipGroup.position.x += 0.025;
                 shipTurning = false;
             } else {
