@@ -6,7 +6,11 @@ let leftPillar, rightPillar,
     bar1, bar2, column1, column2,
     colTop1, colTop2, colTopCone1, colTopCone2,
     leftSideGroup, rightSideGroup,
-    sun;
+    sun,
+    shipBody, shipTip, shipRoof1, shipRoof2,
+    shipGroup;
+
+let shipTurning = false, shipDir = 'left';
 
 // Properties for the torii
 const TORII = {
@@ -167,20 +171,59 @@ function init() {
     sun.position.z = -40;
     scene.add(sun);
 
+    // == SHIP ==
+    // -- Body --
+    geometry = new THREE.CylinderGeometry(1, 0.8, 3, 5, 3, false, 0, Math.PI);
+    material = new THREE.MeshBasicMaterial( {color: 0x777777, side: THREE.DoubleSide} );
+    shipBody = new THREE.Mesh(geometry, material);
+    shipBody.rotation.z = 3 * Math.PI / 2;
+    scene.add(shipBody);
+    
+    // -- Tip --
+    geometry = new THREE.TetrahedronGeometry(0.9);
+    shipTip = new THREE.Mesh(geometry, material);
+    shipTip.position.x = -1.8;
+    shipTip.position.y = -0.35;
+    shipTip.rotation.x = 0.52;
+    shipTip.rotation.y = 0.57;
+    shipTip.rotation.z = 0.77;
+
+    // -- Roof (1/2) --
+    geometry = new THREE.BoxGeometry(1.8, 0.3, 1);
+    shipRoof1 = new THREE.Mesh(geometry, material);
+    shipRoof1.position.y = 0.15;
+
+    // -- Roof (2/2) --
+    geometry = new THREE.CylinderGeometry(0.6, 0.6, 2.5, 2, 3, false, 0, Math.PI);
+    shipRoof2 = new THREE.Mesh(geometry, material);
+    shipRoof2.position.y = 0.3;
+    shipRoof2.rotation.z = Math.PI / 2;
+
+    shipGroup = new THREE.Group();
+    shipGroup.add(shipBody);
+    shipGroup.add(shipTip);
+    shipGroup.add(shipRoof1);
+    shipGroup.add(shipRoof2);
+
+    shipGroup.position.x = 20;
+    shipGroup.position.y = 3;
+    shipGroup.position.z = -30;
+    scene.add(shipGroup);
+
     // == CAMERA ==
     // Place the camera a bit higher.
     camera.position.y = 4;
     
     ///////////////////////
     //   DEBUG CAMERA   //
-    //   /‾\_/‾\        //
-    //  |\_/‾\_/‾‾|_    //
-    //  |         | |   //
-    //  |_________|‾    //
+    //   /‾‾\_/‾‾\      //
+    //  |\__/‾\__/‾‾|_  //
+    //  |           | | //
+    //  |___________|‾  //
     camera.position.x = 0;
     camera.position.y = 3;
     camera.position.z = 10;
-    
+    //                  //
     camera.rotation.y = 0;
     camera.rotation.z = 0;
     ///////////////////////
@@ -195,10 +238,46 @@ function init() {
 function animate() {
     requestAnimationFrame(animate);
 
-    //controls.update();
+    controls.update();
 
     cube.rotation.x += 0.01;
     cube.rotation.y += 0.01;
+
+    if (shipTurning) {
+        if (shipDir == 'left') {
+            if (shipGroup.rotation.y < Math.PI) {
+                shipGroup.rotation.y += 0.02;
+                shipTurning = true;
+            } else {
+                shipTurning = false;
+                shipDir = 'right';
+            }
+        } else {
+            if (shipGroup.rotation.y > 0) {
+                shipGroup.rotation.y -= 0.02;
+                shipTurning = true;
+            } else {
+                shipTurning = false;
+                shipDir = 'left';
+            }
+        }
+    } else {
+        if (shipDir == 'left') {
+            if (shipGroup.position.x > -20) {
+                shipGroup.position.x -= 0.025;
+                shipTurning = false;
+            } else {
+                shipTurning = true;
+            }
+        } else {
+            if (shipGroup.position.x < 20) {
+                shipGroup.position.x += 0.025;
+                shipTurning = false;
+            } else {
+                shipTurning = true;
+            }
+        }
+    }
 
     renderer.render(scene, camera);
 }
