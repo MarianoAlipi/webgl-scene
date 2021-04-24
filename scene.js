@@ -1,5 +1,5 @@
 let scene, camera, renderer, controls;
-let cube, ground;
+let cube, water;
 let leftPillar, rightPillar,
     nuki, gakuzuka,
     shimaki, kasagi,
@@ -55,9 +55,9 @@ function init() {
     // width, height, widthSegments, heightSegments
     geometry = new THREE.PlaneGeometry(200, 200);
     material = new THREE.MeshBasicMaterial( {color: 0x3e67ad, side: THREE.DoubleSide} );
-    ground = new THREE.Mesh(geometry, material);
-    ground.rotation.x = Math.PI / 2;
-    scene.add(ground);
+    water = new THREE.Mesh(geometry, material);
+    water.rotation.x = Math.PI / 2;
+    scene.add(water);
 
     // == TORII ==
     // -- LEFT PILLAR --
@@ -263,12 +263,12 @@ function animate() {
     }
 
     // TODO: Make the sea movement independent.
-    ground.position.y += (shipBob ? 1 : -1) * Math.random() * 0.015;
+    water.position.y += (shipBob ? 1 : -1) * Math.random() * 0.015;
 
-    if (ground.position.y < -0.2) {
-        ground.position.y = 0.2;
-    } else if (ground.position.y > 0.2) {
-        ground.position.y = 0.2;
+    if (water.position.y < -0.2) {
+        water.position.y = 0.2;
+    } else if (water.position.y > 0.2) {
+        water.position.y = 0.2;
     }
 
     if (shipTurning) {
