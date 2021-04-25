@@ -23,7 +23,7 @@ const TORII = {
     x: -8,
     y: 4.8,
     z: -15,
-    pillarHeight: 9.5,
+    pillarHeight: 10,
     radius: 3,
     redMaterial: new THREE.MeshBasicMaterial( {color: 0xaa0000} ),
     blackMaterial: new THREE.MeshBasicMaterial( {color: 0x0a0a0a} ),
