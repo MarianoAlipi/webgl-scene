@@ -6,12 +6,17 @@ let leftPillar, rightPillar,
     bar1, bar2, column1, column2,
     colTop1, colTop2, colTopCone1, colTopCone2,
     leftSideGroup, rightSideGroup,
-    sun,
+    sun, sunGroup,
     shipBody, shipTip, shipRoof1, shipRoof2,
     shipGroup;
 
+const   bobDuration = 30,
+        sunInitialX = 50,
+        sunMinY = -4,
+        sunZ = -55;
+
 let shipTurning = false, shipDir = 'left',
-    shipBob = true, bobDuration = 30, bobFrames = bobDuration;
+    shipBob = true, bobFrames = bobDuration;
 
 // Properties for the torii
 const TORII = {
@@ -52,9 +57,9 @@ function init() {
     cube.position.z = -10;
     scene.add(cube);
     
-    // GROUND
-    // width, height, widthSegments, heightSegments
-    geometry = new THREE.PlaneGeometry(200, 200);
+    // WATER
+    // radius, segments
+    geometry = new THREE.CircleGeometry(200, 32);
     material = new THREE.MeshBasicMaterial( {color: 0x3e67ad, side: THREE.DoubleSide} );
     water = new THREE.Mesh(geometry, material);
     water.rotation.x = Math.PI / 2;
@@ -122,6 +127,8 @@ function init() {
     bar2.position.y = -0.75;
 
     // Columns
+    // TODO: Refactor smaller columns to be one complete object
+    // (including top and topcone).
     geometry = new THREE.CylinderGeometry(0.35, 0.4, 6, 24);
     column1 = new THREE.Mesh(geometry, TORII.redMaterial);
     column1.position.z = 3;
@@ -167,14 +174,18 @@ function init() {
 
     // == SUN ==
     // radius, widthSegments, heightSegments
-    // TODO: Add sun movement.
-    geometry = new THREE.SphereGeometry(2.5, 32, 32);
+    geometry = new THREE.SphereGeometry(3, 32, 32);
     material = new THREE.MeshBasicMaterial( {color: 0xfff9d4} );
     sun = new THREE.Mesh(geometry, material);
-    sun.position.x = 16;
-    sun.position.y = 16;
-    sun.position.z = -40;
-    scene.add(sun);
+    sun.position.x = sunInitialX;
+
+    // Adding the sun to a group makes the rotation
+    // relative to the origin much easier.
+    sunGroup = new THREE.Group();
+    sunGroup.position.y = sunMinY;
+    sunGroup.position.z = sunZ;
+    sunGroup.add(sun);
+    scene.add(sunGroup);
 
     // == SHIP ==
     // -- Body --
@@ -213,7 +224,7 @@ function init() {
 
     shipGroup.position.x = 50;
     shipGroup.position.y = 0.6;
-    shipGroup.position.z = -50;
+    shipGroup.position.z = -35;
     scene.add(shipGroup);
 
     // TODO: Add sky box.
@@ -251,6 +262,15 @@ function animate() {
     cube.rotation.x += 0.01;
     cube.rotation.y += 0.01;
 
+    // Sun movement
+    sunGroup.rotation.z += 0.003;
+
+    // Reset sun position
+    if (sunGroup.rotation.z >= Math.PI + Math.PI / 4) {
+        sunGroup.rotation.z = 0;
+    }
+
+    // Ship bobbing
     shipGroup.position.y += (shipBob ? 1 : -1) * Math.random() * 0.01;
     if (--bobFrames <= 0) {
         shipBob = !shipBob;
@@ -264,7 +284,7 @@ function animate() {
     }
 
     // TODO: Make the sea movement independent.
-    water.position.y += (shipBob ? 1 : -1) * Math.random() * 0.015;
+    water.position.y += (shipBob ? 1 : -1) * Math.random() * 0.02;
 
     if (water.position.y < -0.2) {
         water.position.y = 0.2;
@@ -272,6 +292,7 @@ function animate() {
         water.position.y = 0.2;
     }
 
+    // Ship movement and turning
     if (shipTurning) {
         if (shipDir == 'left') {
             if (shipGroup.rotation.y < Math.PI) {
