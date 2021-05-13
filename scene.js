@@ -15,6 +15,9 @@ const   bobDuration = 30,
         sunMinY = -4,
         sunZ = -55;
 
+const   seaTexture = new THREE.TextureLoader().load('textures/sea.jpg'),
+        seaMaterial = new THREE.MeshBasicMaterial( {map: seaTexture, side: THREE.DoubleSide, transparent: true, opacity: 0.4} );
+
 let shipTurning = false, shipDir = 'left',
     shipBob = true, bobFrames = bobDuration;
 
@@ -25,9 +28,25 @@ const TORII = {
     z: -15,
     pillarHeight: 10,
     radius: 3,
-    redMaterial: new THREE.MeshBasicMaterial( {color: 0xaa0000} ),
-    blackMaterial: new THREE.MeshBasicMaterial( {color: 0x0a0a0a} ),
-};
+    textures: {
+        'torii': new THREE.TextureLoader().load('textures/torii.png'),
+        'pillar': new THREE.TextureLoader().load('textures/torii_pillar.png'),
+        'roof': new THREE.TextureLoader().load('textures/roof.png'),
+    },
+    materials: {
+        red: new THREE.MeshBasicMaterial( {color: 0xaa0000} ),
+        black: new THREE.MeshBasicMaterial( {color: 0x0a0a0a} ),
+        torii: null,
+        pillar: null,
+        roof: null,
+    },
+    init: function() {
+        this.materials.torii = new THREE.MeshBasicMaterial( {map: this.textures.torii} );
+        this.materials.pillar = new THREE.MeshBasicMaterial( {map: this.textures.pillar} );
+        this.materials.roof = new THREE.MeshBasicMaterial( {map: this.textures.roof} );
+        return this;
+    }
+}.init();
 
 function init() {
     scene = new THREE.Scene();
@@ -61,15 +80,16 @@ function init() {
     // radius, segments
     geometry = new THREE.CircleGeometry(200, 32);
     material = new THREE.MeshBasicMaterial( {color: 0x3e67ad, side: THREE.DoubleSide} );
-    water = new THREE.Mesh(geometry, material);
-    water.rotation.x = Math.PI / 2;
+    //water = new THREE.Mesh(geometry, material);
+    water = new THREE.Mesh(geometry, seaMaterial);
+    water.rotation.x = -1 * Math.PI / 2;
     scene.add(water);
 
     // == TORII ==
     // -- LEFT PILLAR --
     // radiusTop, radiusBottom, height, radialSegments
     geometry = new THREE.CylinderGeometry(0.4, 0.7, TORII.pillarHeight, 32);
-    leftPillar = new THREE.Mesh(geometry, TORII.redMaterial);
+    leftPillar = new THREE.Mesh(geometry, TORII.materials.pillar);
     leftPillar.position.x = TORII.x - TORII.radius;
     leftPillar.position.y = TORII.y;
     leftPillar.position.z = TORII.z;
@@ -83,7 +103,7 @@ function init() {
     // -- NUKI --
     // Middle horizontal bar
     geometry = new THREE.BoxGeometry(11, 0.9, 0.5);
-    nuki = new THREE.Mesh(geometry, TORII.redMaterial);
+    nuki = new THREE.Mesh(geometry, TORII.materials.torii);
     nuki.position.x = TORII.x;
     nuki.position.y = TORII.y + TORII.pillarHeight / 4 + 0.5;
     nuki.position.z = TORII.z;
@@ -93,7 +113,7 @@ function init() {
     // Bar from middle to top
     // TODO: Add plaque.
     geometry = new THREE.BoxGeometry(0.8, 2, 0.3);
-    gakuzuka = new THREE.Mesh(geometry, TORII.redMaterial);
+    gakuzuka = new THREE.Mesh(geometry, TORII.materials.torii);
     gakuzuka.position.x = TORII.x;
     gakuzuka.position.y = nuki.position.y + 1.4;
     gakuzuka.position.z = TORII.z;
@@ -102,7 +122,7 @@ function init() {
     // -- SHIMAKI --
     // Top red bar
     geometry = new THREE.BoxGeometry(12, 0.9, 0.7);
-    shimaki = new THREE.Mesh(geometry, TORII.redMaterial);
+    shimaki = new THREE.Mesh(geometry, TORII.materials.torii);
     shimaki.position.x = TORII.x;
     shimaki.position.y = TORII.y + TORII.pillarHeight / 2;
     shimaki.position.z = TORII.z;
@@ -112,7 +132,7 @@ function init() {
     // Top black bar
     // TODO: Add sharp end. If possible, add curvature to the horizontal bars.
     geometry = new THREE.BoxGeometry(14.5, 0.9, 0.8);
-    kasagi = new THREE.Mesh(geometry, TORII.blackMaterial);
+    kasagi = new THREE.Mesh(geometry, TORII.materials.roof);
     kasagi.position.x = TORII.x;
     kasagi.position.y = shimaki.position.y + 0.6;
     kasagi.position.z = TORII.z;
@@ -121,7 +141,7 @@ function init() {
     // -- SIDE STRUCTURES --
     // Positions are relative to the group.
     geometry = new THREE.BoxGeometry(0.4, 0.65, 7.25);
-    bar1 = new THREE.Mesh(geometry, TORII.redMaterial);
+    bar1 = new THREE.Mesh(geometry, TORII.materials.torii);
     bar1.position.y = 2;
     bar2 = bar1.clone();
     bar2.position.y = -0.75;
@@ -130,14 +150,14 @@ function init() {
     // TODO: Refactor smaller columns to be one complete object
     // (including top and topcone).
     geometry = new THREE.CylinderGeometry(0.35, 0.4, 6, 24);
-    column1 = new THREE.Mesh(geometry, TORII.redMaterial);
+    column1 = new THREE.Mesh(geometry, TORII.materials.pillar);
     column1.position.z = 3;
     column2 = column1.clone();
     column2.position.z = -3;
 
     // Column top
     geometry = new THREE.CylinderGeometry(0.75, 0.7, 0.25, 4);
-    colTop1 = new THREE.Mesh(geometry, TORII.redMaterial);
+    colTop1 = new THREE.Mesh(geometry, TORII.materials.torii);
     colTop1.position.y = 3;
     colTop1.position.z = 3;
     colTop1.rotation.y = 0.8;
@@ -146,7 +166,7 @@ function init() {
 
     // Cone on column top
     geometry = new THREE.ConeGeometry(0.85, 0.3, 4);
-    colTopCone1 = new THREE.Mesh(geometry, TORII.blackMaterial);
+    colTopCone1 = new THREE.Mesh(geometry, TORII.materials.roof);
     colTopCone1.position.y = 3.25;
     colTopCone1.position.z = 3;
     colTopCone1.rotation.y = 0.8;
@@ -287,7 +307,7 @@ function animate() {
     water.position.y += (shipBob ? 1 : -1) * Math.random() * 0.02;
 
     if (water.position.y < -0.2) {
-        water.position.y = 0.2;
+        water.position.y = -0.2;
     } else if (water.position.y > 0.2) {
         water.position.y = 0.2;
     }
