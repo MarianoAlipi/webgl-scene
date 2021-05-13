@@ -1,5 +1,6 @@
-let scene, camera, renderer, controls;
-let cube, water;
+let scene, camera, renderer, controls,
+    geometry, texture, material;
+let cube, water, sand;
 let leftPillar, rightPillar,
     nuki, gakuzuka,
     shimaki, kasagi,
@@ -8,7 +9,8 @@ let leftPillar, rightPillar,
     leftSideGroup, rightSideGroup,
     sun, sunGroup,
     shipBody, shipTip, shipRoof1, shipRoof2,
-    shipGroup;
+    shipGroup,
+    skyDome;
 
 const   bobDuration = 30,
         sunInitialX = 50,
@@ -16,7 +18,13 @@ const   bobDuration = 30,
         sunZ = -55;
 
 const   seaTexture = new THREE.TextureLoader().load('textures/sea.jpg'),
-        seaMaterial = new THREE.MeshBasicMaterial( {map: seaTexture, side: THREE.DoubleSide, transparent: true, opacity: 0.4} );
+        metalTexture = new THREE.TextureLoader().load('textures/metal.jpg'),
+        skyTexture = new THREE.TextureLoader().load('textures/sky.jpg'),
+        sandTexture = new THREE.TextureLoader().load('textures/sand.jpg'),
+        seaMaterial = new THREE.MeshBasicMaterial( {map: seaTexture, side: THREE.DoubleSide, transparent: true, opacity: 0.7} ),
+        metalMaterial = new THREE.MeshBasicMaterial( {map: metalTexture} ),
+        skyMaterial = new THREE.MeshBasicMaterial( {map: skyTexture, side: THREE.BackSide } ),
+        sandMaterial = new THREE.MeshBasicMaterial( {map: sandTexture, side: THREE.BackSide } );
 
 let shipTurning = false, shipDir = 'left',
     shipBob = true, bobFrames = bobDuration;
@@ -65,25 +73,39 @@ function init() {
     
     document.body.appendChild(renderer.domElement);
 
+    // == SKYDOME ==
+    // radius, widthSegments, heightSegments,
+    // phiStart, phiLength, thetaStart, thetaLength
+    // phi: horizontal sweep, theta: vertical sweep
+    geometry = new THREE.SphereGeometry(200, 32, 32, 0, Math.PI * 2, 0, Math.PI / 2);
+    skyDome = new THREE.Mesh(geometry, skyMaterial);
+    scene.add(skyDome);
+
     // CUBE
     // width, height, depth, widthSegments, heightSegments, depthSegments
-    let geometry = new THREE.BoxGeometry(2, 2, 2);
-    let texture = new THREE.TextureLoader().load('textures/hello.png');
-    let material = new THREE.MeshBasicMaterial( {map: texture} );
+    geometry = new THREE.BoxGeometry(2, 2, 2);
+    texture = new THREE.TextureLoader().load('textures/hello.png');
+    material = new THREE.MeshBasicMaterial( {map: texture} );
     cube = new THREE.Mesh(geometry, material);
     cube.position.x = 20;
     cube.position.y = 2;
     cube.position.z = -10;
     scene.add(cube);
     
-    // WATER
-    // radius, segments
-    geometry = new THREE.CircleGeometry(200, 32);
-    material = new THREE.MeshBasicMaterial( {color: 0x3e67ad, side: THREE.DoubleSide} );
-    //water = new THREE.Mesh(geometry, material);
+    // == SEA / WATER ==
+    // width, height
+    geometry = new THREE.PlaneGeometry(400, 400);
     water = new THREE.Mesh(geometry, seaMaterial);
     water.rotation.x = -1 * Math.PI / 2;
     scene.add(water);
+    
+    // == SAND ==
+    // width, height
+    geometry = new THREE.PlaneGeometry(400, 400);
+    sand = new THREE.Mesh(geometry, sandMaterial);
+    sand.rotation.x = Math.PI / 2;
+    sand.position.y = -0.5;
+    scene.add(sand);
 
     // == TORII ==
     // -- LEFT PILLAR --
@@ -212,13 +234,13 @@ function init() {
     // TODO: Add cover (plane) to the ship.
     geometry = new THREE.CylinderGeometry(1, 0.8, 3, 5, 3, false, 0, Math.PI);
     material = new THREE.MeshBasicMaterial( {color: 0x777777, side: THREE.DoubleSide} );
-    shipBody = new THREE.Mesh(geometry, material);
+    shipBody = new THREE.Mesh(geometry, metalMaterial);
     shipBody.rotation.z = 3 * Math.PI / 2;
     scene.add(shipBody);
     
     // -- Tip --
     geometry = new THREE.TetrahedronGeometry(0.9);
-    shipTip = new THREE.Mesh(geometry, material);
+    shipTip = new THREE.Mesh(geometry, metalMaterial);
     shipTip.position.x = -1.8;
     shipTip.position.y = -0.35;
     shipTip.rotation.x = 0.52;
@@ -229,10 +251,10 @@ function init() {
     geometry = new THREE.BoxGeometry(1.8, 0.3, 1);
     shipRoof1 = new THREE.Mesh(geometry, material);
     shipRoof1.position.y = 0.15;
-
+    
     // -- Roof (2/2) --
     geometry = new THREE.CylinderGeometry(0.6, 0.6, 2.5, 2, 3, false, 0, Math.PI);
-    shipRoof2 = new THREE.Mesh(geometry, material);
+    shipRoof2 = new THREE.Mesh(geometry, TORII.materials.roof);
     shipRoof2.position.y = 0.3;
     shipRoof2.rotation.z = Math.PI / 2;
 
@@ -246,8 +268,6 @@ function init() {
     shipGroup.position.y = 0.6;
     shipGroup.position.z = -35;
     scene.add(shipGroup);
-
-    // TODO: Add sky box.
 
     // == CAMERA ==
     // Place the camera a bit higher.
@@ -282,6 +302,9 @@ function animate() {
     cube.rotation.x += 0.01;
     cube.rotation.y += 0.01;
 
+    // Skydome rotation
+    skyDome.rotation.y += 0.0004;
+
     // Sun movement
     sunGroup.rotation.z += 0.003;
 
@@ -308,8 +331,8 @@ function animate() {
 
     if (water.position.y < -0.2) {
         water.position.y = -0.2;
-    } else if (water.position.y > 0.2) {
-        water.position.y = 0.2;
+    } else if (water.position.y > 0.3) {
+        water.position.y = 0.3;
     }
 
     // Ship movement and turning
