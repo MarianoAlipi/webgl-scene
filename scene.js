@@ -10,7 +10,7 @@ let leftPillar, rightPillar,
     sun, sunGroup,
     shipBody, shipTip, shipRoof1, shipRoof2,
     shipGroup,
-    skyDome;
+    skyDome, skyDomeHills;
 
 const   bobDuration = 30,
         sunInitialX = 50,
@@ -19,12 +19,14 @@ const   bobDuration = 30,
 
 const   seaTexture = new THREE.TextureLoader().load('textures/sea.jpg'),
         metalTexture = new THREE.TextureLoader().load('textures/metal.jpg'),
-        skyTexture = new THREE.TextureLoader().load('textures/sky.jpg'),
+        skyTexture = new THREE.TextureLoader().load('textures/sky.png'),
+        hillsTexture = new THREE.TextureLoader().load('textures/hills.png'),
         sandTexture = new THREE.TextureLoader().load('textures/sand.jpg'),
-        seaMaterial = new THREE.MeshBasicMaterial( {map: seaTexture, side: THREE.DoubleSide, transparent: true, opacity: 0.7} ),
+        seaMaterial = new THREE.MeshBasicMaterial( {map: seaTexture, side: THREE.DoubleSide, transparent: true, opacity: 0.8} ),
         metalMaterial = new THREE.MeshBasicMaterial( {map: metalTexture} ),
         skyMaterial = new THREE.MeshBasicMaterial( {map: skyTexture, side: THREE.BackSide } ),
-        sandMaterial = new THREE.MeshBasicMaterial( {map: sandTexture, side: THREE.BackSide } );
+        hillsMaterial = new THREE.MeshBasicMaterial( {map: hillsTexture, side: THREE.BackSide, transparent: true } ),
+        sandMaterial = new THREE.MeshBasicMaterial( {map: sandTexture} );
 
 let shipTurning = false, shipDir = 'left',
     shipBob = true, bobFrames = bobDuration;
@@ -80,6 +82,10 @@ function init() {
     geometry = new THREE.SphereGeometry(200, 32, 32, 0, Math.PI * 2, 0, Math.PI / 2);
     skyDome = new THREE.Mesh(geometry, skyMaterial);
     scene.add(skyDome);
+    
+    geometry = new THREE.SphereGeometry(199, 32, 32, 0, Math.PI * 2, 0, Math.PI / 2);
+    skyDomeHills = new THREE.Mesh(geometry, hillsMaterial);
+    scene.add(skyDomeHills);
 
     // CUBE
     // width, height, depth, widthSegments, heightSegments, depthSegments
@@ -103,7 +109,7 @@ function init() {
     // width, height
     geometry = new THREE.PlaneGeometry(400, 400);
     sand = new THREE.Mesh(geometry, sandMaterial);
-    sand.rotation.x = Math.PI / 2;
+    sand.rotation.x = -1 * Math.PI / 2;
     sand.position.y = -0.5;
     scene.add(sand);
 
@@ -303,7 +309,7 @@ function animate() {
     cube.rotation.y += 0.01;
 
     // Skydome rotation
-    skyDome.rotation.y += 0.0004;
+    skyDome.rotation.y += 0.0008;
 
     // Sun movement
     sunGroup.rotation.z += 0.003;
