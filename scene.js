@@ -1,6 +1,6 @@
 let scene, camera, renderer, controls,
     geometry, texture, material;
-let cube, water, sand;
+let water, sand;
 let leftPillar, rightPillar,
     nuki, gakuzuka,
     shimaki, kasagi,
@@ -86,17 +86,6 @@ function init() {
     geometry = new THREE.SphereGeometry(199, 32, 32, 0, Math.PI * 2, 0, Math.PI / 2);
     skyDomeHills = new THREE.Mesh(geometry, hillsMaterial);
     scene.add(skyDomeHills);
-
-    // CUBE
-    // width, height, depth, widthSegments, heightSegments, depthSegments
-    geometry = new THREE.BoxGeometry(2, 2, 2);
-    texture = new THREE.TextureLoader().load('textures/hello.png');
-    material = new THREE.MeshBasicMaterial( {map: texture} );
-    cube = new THREE.Mesh(geometry, material);
-    cube.position.x = 20;
-    cube.position.y = 2;
-    cube.position.z = -10;
-    scene.add(cube);
     
     // == SEA / WATER ==
     // width, height
@@ -304,9 +293,6 @@ function animate() {
     requestAnimationFrame(animate);
 
     controls.update();
-
-    cube.rotation.x += 0.01;
-    cube.rotation.y += 0.01;
 
     // Skydome rotation
     skyDome.rotation.y += 0.0008;
