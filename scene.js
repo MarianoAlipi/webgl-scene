@@ -315,12 +315,15 @@ function init() {
     camera.position.z = 14;
     ///////////////////////
     
-    //const helper = new THREE.CameraHelper(light.shadow.camera);
+    // This helps debug the light source.
+    // const helper = new THREE.CameraHelper(light.shadow.camera);
     //scene.add(helper);
 
+    // To be able to hear sounds.
     listener = new THREE.AudioListener();
     camera.add(listener);
     
+    // Create the global audio source.
     seaSound = new THREE.Audio(listener);
     audioLoader = new THREE.AudioLoader();
     audioLoader.load('sounds/sea.ogg', function(buffer) {
@@ -342,7 +345,7 @@ function animate() {
     light.target = shipRoof2;
 
     // Skydome rotation
-    skyDome.rotation.y += 0.0008;
+    skyDome.rotation.y += 0.002;
 
     // Sun movement
     sunGroup.rotation.z += 0.003;
