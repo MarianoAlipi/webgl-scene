@@ -310,11 +310,9 @@ function init() {
     //  |           | | //
     //  |___________|‾  //
     // Position         //
-    camera.position.y = 3;
-    camera.position.z = 10;
-    // Tilt the camera  //
-    // slightly down.   //
-    camera.rotation.x = -0.1;
+    camera.position.x = 5;
+    camera.position.y = 4;
+    camera.position.z = 14;
     ///////////////////////
     
     //const helper = new THREE.CameraHelper(light.shadow.camera);
