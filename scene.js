@@ -79,7 +79,7 @@ function init() {
     
     document.body.appendChild(renderer.domElement);
 
-    light = new THREE.PointLight(0xfff9d4, 1, 1000, 1);
+    light = new THREE.PointLight(0xfff9d4, 1.4, 1000, 1);
     light.castShadow = true;
     
     //Set up shadow properties for the light
