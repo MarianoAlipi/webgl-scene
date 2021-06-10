@@ -1,4 +1,4 @@
-let scene, camera, renderer, controls,
+let scene, camera, renderer, controls, light,
     geometry, texture, material;
 let water, sand;
 let leftPillar, rightPillar,
@@ -22,11 +22,11 @@ const   seaTexture = new THREE.TextureLoader().load('textures/sea.jpg'),
         skyTexture = new THREE.TextureLoader().load('textures/sky.png'),
         hillsTexture = new THREE.TextureLoader().load('textures/hills.png'),
         sandTexture = new THREE.TextureLoader().load('textures/sand.jpg'),
-        seaMaterial = new THREE.MeshBasicMaterial( {map: seaTexture, side: THREE.DoubleSide, transparent: true, opacity: 0.8} ),
-        metalMaterial = new THREE.MeshBasicMaterial( {map: metalTexture} ),
-        skyMaterial = new THREE.MeshBasicMaterial( {map: skyTexture, side: THREE.BackSide } ),
-        hillsMaterial = new THREE.MeshBasicMaterial( {map: hillsTexture, side: THREE.BackSide, transparent: true } ),
-        sandMaterial = new THREE.MeshBasicMaterial( {map: sandTexture} );
+        seaMaterial = new THREE.MeshStandardMaterial( {map: seaTexture, side: THREE.DoubleSide, transparent: true, opacity: 0.8} ),
+        metalMaterial = new THREE.MeshStandardMaterial( {map: metalTexture} ),
+        skyMaterial = new THREE.MeshStandardMaterial( {map: skyTexture, side: THREE.BackSide } ),
+        hillsMaterial = new THREE.MeshStandardMaterial( {map: hillsTexture, side: THREE.BackSide, transparent: true } ),
+        sandMaterial = new THREE.MeshStandardMaterial( {map: sandTexture} );
 
 let shipTurning = false, shipDir = 'left',
     shipBob = true, bobFrames = bobDuration;
@@ -44,21 +44,22 @@ const TORII = {
         'roof': new THREE.TextureLoader().load('textures/roof.png'),
     },
     materials: {
-        red: new THREE.MeshBasicMaterial( {color: 0xaa0000} ),
-        black: new THREE.MeshBasicMaterial( {color: 0x0a0a0a} ),
+        red: new THREE.MeshStandardMaterial( {color: 0xaa0000} ),
+        black: new THREE.MeshStandardMaterial( {color: 0x0a0a0a} ),
         torii: null,
         pillar: null,
         roof: null,
     },
     init: function() {
-        this.materials.torii = new THREE.MeshBasicMaterial( {map: this.textures.torii} );
-        this.materials.pillar = new THREE.MeshBasicMaterial( {map: this.textures.pillar} );
-        this.materials.roof = new THREE.MeshBasicMaterial( {map: this.textures.roof} );
+        this.materials.torii = new THREE.MeshStandardMaterial( {map: this.textures.torii} );
+        this.materials.pillar = new THREE.MeshStandardMaterial( {map: this.textures.pillar} );
+        this.materials.roof = new THREE.MeshStandardMaterial( {map: this.textures.roof} );
         return this;
     }
 }.init();
 
 function init() {
+
     scene = new THREE.Scene();
     
     camera = new THREE.PerspectiveCamera(
@@ -69,12 +70,29 @@ function init() {
     );
     
     renderer = new THREE.WebGLRenderer( {antialias: true} );
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setClearColor(0x000000);
     
     document.body.appendChild(renderer.domElement);
 
+    light = new THREE.PointLight(0xfff9d4, 1, 1000, 1);
+    light.castShadow = true;
+    
+    //Set up shadow properties for the light
+    light.shadow.mapSize.width = 512;
+    light.shadow.mapSize.height = 512;
+    light.shadow.camera.near = 0.5;
+    light.shadow.camera.far = 500;
+
+    light.position.x = 75;
+    light.position.y = 100;
+    light.position.z = -75;
+
+    scene.add(light);
+    
     // == SKYDOME ==
     // radius, widthSegments, heightSegments,
     // phiStart, phiLength, thetaStart, thetaLength
@@ -92,6 +110,7 @@ function init() {
     geometry = new THREE.PlaneGeometry(400, 400);
     water = new THREE.Mesh(geometry, seaMaterial);
     water.rotation.x = -1 * Math.PI / 2;
+    water.receiveShadow = true;
     scene.add(water);
     
     // == SAND ==
@@ -100,6 +119,7 @@ function init() {
     sand = new THREE.Mesh(geometry, sandMaterial);
     sand.rotation.x = -1 * Math.PI / 2;
     sand.position.y = -0.5;
+    sand.receiveShadow = true;
     scene.add(sand);
 
     // == TORII ==
@@ -110,11 +130,13 @@ function init() {
     leftPillar.position.x = TORII.x - TORII.radius;
     leftPillar.position.y = TORII.y;
     leftPillar.position.z = TORII.z;
+    leftPillar.castShadow = true;
     scene.add(leftPillar);
     
     // -- RIGHT PILLAR --
     rightPillar = leftPillar.clone();
     rightPillar.position.x += 2 * TORII.radius;
+    rightPillar.castShadow = true;
     scene.add(rightPillar);
 
     // -- NUKI --
@@ -124,6 +146,7 @@ function init() {
     nuki.position.x = TORII.x;
     nuki.position.y = TORII.y + TORII.pillarHeight / 4 + 0.5;
     nuki.position.z = TORII.z;
+    nuki.castShadow = true;
     scene.add(nuki);
 
     // -- GAKUZUKA --
@@ -134,6 +157,7 @@ function init() {
     gakuzuka.position.x = TORII.x;
     gakuzuka.position.y = nuki.position.y + 1.4;
     gakuzuka.position.z = TORII.z;
+    gakuzuka.castShadow = true;
     scene.add(gakuzuka);
     
     // -- SHIMAKI --
@@ -143,6 +167,7 @@ function init() {
     shimaki.position.x = TORII.x;
     shimaki.position.y = TORII.y + TORII.pillarHeight / 2;
     shimaki.position.z = TORII.z;
+    shimaki.castShadow = true;
     scene.add(shimaki);
 
     // -- KASAGI --
@@ -153,6 +178,7 @@ function init() {
     kasagi.position.x = TORII.x;
     kasagi.position.y = shimaki.position.y + 0.6;
     kasagi.position.z = TORII.z;
+    kasagi.castShadow = true;
     scene.add(kasagi);
 
     // -- SIDE STRUCTURES --
@@ -160,8 +186,10 @@ function init() {
     geometry = new THREE.BoxGeometry(0.4, 0.65, 7.25);
     bar1 = new THREE.Mesh(geometry, TORII.materials.torii);
     bar1.position.y = 2;
+    bar1.castShadow = true;
     bar2 = bar1.clone();
     bar2.position.y = -0.75;
+    bar2.castShadow = true;
 
     // Columns
     // TODO: Refactor smaller columns to be one complete object
@@ -169,8 +197,10 @@ function init() {
     geometry = new THREE.CylinderGeometry(0.35, 0.4, 6, 24);
     column1 = new THREE.Mesh(geometry, TORII.materials.pillar);
     column1.position.z = 3;
+    column1.castShadow = true;
     column2 = column1.clone();
     column2.position.z = -3;
+    column2.castShadow = true;
 
     // Column top
     geometry = new THREE.CylinderGeometry(0.75, 0.7, 0.25, 4);
@@ -180,6 +210,8 @@ function init() {
     colTop1.rotation.y = 0.8;
     colTop2 = colTop1.clone();
     colTop2.position.z = -3;
+    colTop1.castShadow = true;
+    colTop2.castShadow = true;
 
     // Cone on column top
     geometry = new THREE.ConeGeometry(0.85, 0.3, 4);
@@ -189,6 +221,8 @@ function init() {
     colTopCone1.rotation.y = 0.8;
     colTopCone2 = colTopCone1.clone();
     colTopCone2.position.z = -3;
+    colTopCone1.castShadow = true;
+    colTopCone2.castShadow = true;
 
     // Groups
     leftSideGroup = new THREE.Group();
@@ -228,9 +262,10 @@ function init() {
     // -- Body --
     // TODO: Add cover (plane) to the ship.
     geometry = new THREE.CylinderGeometry(1, 0.8, 3, 5, 3, false, 0, Math.PI);
-    material = new THREE.MeshBasicMaterial( {color: 0x777777, side: THREE.DoubleSide} );
+    material = new THREE.MeshStandardMaterial( {color: 0x777777, side: THREE.DoubleSide} );
     shipBody = new THREE.Mesh(geometry, metalMaterial);
     shipBody.rotation.z = 3 * Math.PI / 2;
+    shipBody.castShadow = true;
     scene.add(shipBody);
     
     // -- Tip --
@@ -241,17 +276,20 @@ function init() {
     shipTip.rotation.x = 0.52;
     shipTip.rotation.y = 0.57;
     shipTip.rotation.z = 0.77;
+    shipTip.castShadow = true;
 
     // -- Roof (1/2) --
     geometry = new THREE.BoxGeometry(1.8, 0.3, 1);
     shipRoof1 = new THREE.Mesh(geometry, material);
     shipRoof1.position.y = 0.15;
+    shipRoof1.castShadow = true;
     
     // -- Roof (2/2) --
     geometry = new THREE.CylinderGeometry(0.6, 0.6, 2.5, 2, 3, false, 0, Math.PI);
     shipRoof2 = new THREE.Mesh(geometry, TORII.materials.roof);
     shipRoof2.position.y = 0.3;
     shipRoof2.rotation.z = Math.PI / 2;
+    shipRoof2.castShadow = true;
 
     shipGroup = new THREE.Group();
     shipGroup.add(shipBody);
@@ -264,26 +302,22 @@ function init() {
     shipGroup.position.z = -35;
     scene.add(shipGroup);
 
-    // == CAMERA ==
-    // Place the camera a bit higher.
-    camera.position.y = 4;
-    
     ///////////////////////
-    //   DEBUG CAMERA   //
+    //     CAMERA       //
     //   /‾‾\_/‾‾\      //
     //  |\__/‾\__/‾‾|_  //
     //  |           | | //
     //  |___________|‾  //
-    camera.position.x = 0;
+    // Position         //
     camera.position.y = 3;
     camera.position.z = 10;
-    //                  //
-    camera.rotation.y = 0;
-    camera.rotation.z = 0;
+    // Tilt the camera  //
+    // slightly down.   //
+    camera.rotation.x = -0.1;
     ///////////////////////
     
-    // Tilt the camera slightly down.
-    camera.rotation.x = -0.1;
+    //const helper = new THREE.CameraHelper(light.shadow.camera);
+    //scene.add(helper);
     
     controls = new THREE.OrbitControls(camera, renderer.domElement);
 }
@@ -293,6 +327,8 @@ function animate() {
     requestAnimationFrame(animate);
 
     controls.update();
+
+    light.target = shipRoof2;
 
     // Skydome rotation
     skyDome.rotation.y += 0.0008;
