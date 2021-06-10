@@ -1,4 +1,4 @@
-let scene, camera, renderer, controls, light,
+let scene, camera, renderer, controls, light, listener, audioLoader,
     geometry, texture, material;
 let water, sand;
 let leftPillar, rightPillar,
@@ -10,7 +10,8 @@ let leftPillar, rightPillar,
     sun, sunGroup,
     shipBody, shipTip, shipRoof1, shipRoof2,
     shipGroup,
-    skyDome, skyDomeHills;
+    skyDome, skyDomeHills,
+    seaSound;
 
 const   bobDuration = 30,
         sunInitialX = 50,
@@ -318,6 +319,18 @@ function init() {
     
     //const helper = new THREE.CameraHelper(light.shadow.camera);
     //scene.add(helper);
+
+    listener = new THREE.AudioListener();
+    camera.add(listener);
+    
+    seaSound = new THREE.Audio(listener);
+    audioLoader = new THREE.AudioLoader();
+    audioLoader.load('sounds/sea.ogg', function(buffer) {
+        seaSound.setBuffer(buffer);
+        seaSound.setLoop(true);
+        seaSound.setVolume(0.1);
+        seaSound.play();
+    });
     
     controls = new THREE.OrbitControls(camera, renderer.domElement);
 }
